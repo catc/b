@@ -4,19 +4,32 @@ import (
 	"bufio"
 	"fmt"
 	"os/exec"
-	"reflect"
+	"sort"
 	"strings"
 )
+
+const dateFieldWidth = 11
+const committerFieldPadding = 5
+const nameFieldPadding = 1
 
 // Branches contains all branches and git related configs
 type Branches struct {
 	Branches           []Branch
 	CurrentBranch      string
 	CurrentBranchIndex int
-	MaxColumnLength    map[string]int
+	MaxColumnWidth     map[string]int
 }
 
-// GetBranches fetches all branches
+func newGitBranches() *Branches {
+	return &Branches{
+		Branches:           make([]Branch, 0),
+		CurrentBranch:      "_",
+		CurrentBranchIndex: -1,
+		MaxColumnWidth:     make(map[string]int),
+	}
+}
+
+// GetBranches returns struct for git branches in the repo
 func GetBranches() (*Branches, error) {
 	gitExecutable, err := exec.LookPath("git")
 	if err != nil {
@@ -44,10 +57,7 @@ func parseGitBranches(rawBranches string) *Branches {
 		lines = append(lines, sc.Text())
 	}
 
-	gb := Branches{
-		Branches:        make([]Branch, 0),
-		MaxColumnLength: make(map[string]int),
-	}
+	gb := newGitBranches()
 
 	// get individual branch name + metadata
 	for i, str := range lines {
@@ -65,27 +75,50 @@ func parseGitBranches(rawBranches string) *Branches {
 		b := Branch{Name: name}
 		b.populateBranchMetadata()
 
+		gb.calcColumnWidth(b.LastCommitter, b.Name)
 		gb.Branches = append(gb.Branches, b)
 	}
 
-	return &gb
+	// sort by date
+	branches := gb.Branches
+	sort.Slice(gb.Branches, func(i, j int) bool {
+		return branches[i].LastCommit.After(branches[j].LastCommit)
+	})
+
+	return gb
 }
 
-// TODO
-func (branches *Branches) getBranchMetadata() {
-	for _, b := range branches.Branches {
-		r := reflect.ValueOf(b)
-		for _, field := range fieldsToDisplay {
-			fmt.Println(field, r)
-		}
+/*
+	calculate the max width of each field to allow for even spacing
+	and alignment across rows
+*/
+func (gb *Branches) calcColumnWidth(committer, name string) {
+	if len(committer) > gb.MaxColumnWidth["committer"] {
+		gb.MaxColumnWidth["committer"] = len(committer)
+	}
+
+	if len(name) > gb.MaxColumnWidth["name"] {
+		gb.MaxColumnWidth["name"] = len(name)
 	}
 }
 
-// FormatBranchStrings returns the branch strings formatted for survey
-func (branches *Branches) FormatBranchStrings() []string {
+// FormatBranchStrings converts the branch obj to a pretty, formatted string
+func (gb *Branches) FormatBranchStrings() []string {
+	maxCommitterLen := gb.MaxColumnWidth["committer"]
+	maxNameLen := gb.MaxColumnWidth["name"]
+
 	items := make([]string, 0)
-	for _, b := range branches.Branches {
-		formatted := fmt.Sprintf("%-11v %v %v", b.formatDate(), b.LastCommitter, b.Name)
+	for _, b := range gb.Branches {
+		// TODO - add colors
+		// TODO - add [current] tag
+		formatted := fmt.Sprintf("%*s %*s %*s",
+			-dateFieldWidth,
+			b.formatDate(),
+			-maxCommitterLen-committerFieldPadding,
+			b.LastCommitter,
+			-maxNameLen-nameFieldPadding,
+			b.Name,
+		)
 		items = append(items, formatted)
 	}
 	return items

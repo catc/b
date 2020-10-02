@@ -11,7 +11,7 @@ import (
 // Branch defines a git branch
 type Branch struct {
 	Name          string
-	LastEdited    time.Time
+	LastCommit    time.Time
 	LastCommitter string
 }
 
@@ -38,7 +38,7 @@ func (b *Branch) populateBranchMetadata() {
 
 	fields := strings.Fields(string(output))
 	if len(fields) == 2 {
-		b.LastEdited = parseUnixTimestamp(fields[0])
+		b.LastCommit = parseUnixTimestamp(fields[0])
 		b.LastCommitter = fields[1]
 		fmt.Println(b.formatDate())
 	}
@@ -53,9 +53,9 @@ func parseUnixTimestamp(str string) time.Time {
 }
 
 func (b *Branch) formatDate() string {
-	if b.LastEdited.IsZero() {
+	if b.LastCommit.IsZero() {
 		return ""
 	}
-	year, month, day := b.LastEdited.Date()
+	year, month, day := b.LastCommit.Date()
 	return fmt.Sprintf("%v-%02v-%02v", year, int(month), day)
 }
