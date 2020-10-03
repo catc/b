@@ -14,7 +14,7 @@ import (
 func changeBranch() {
 	gb, err := git.GetBranches()
 	if err != nil {
-		fmt.Println("Error fetching branches -", err.Error())
+		fmt.Println(err)
 		return
 	}
 
@@ -36,7 +36,7 @@ func changeBranch() {
 	differentBranchValidator := func(val interface{}) error {
 		option, ok := val.(survey.OptionAnswer)
 		if !ok || option.Index == gb.CurrentBranchIndex {
-			return errors.New("Value is required")
+			return errors.New("You are currently on this branch")
 		}
 		return nil
 	}
@@ -55,6 +55,5 @@ func changeBranch() {
 
 	fmt.Println(index)
 
-	// TODO - add error when trying to select same current branch
-
+	// TODO - change to selected branch and exit
 }

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os/exec"
-	"sort"
 	"strings"
 )
 
@@ -36,13 +35,20 @@ func GetBranches() (*Branches, error) {
 		panic("git not found")
 	}
 
+	/*
+		format:
+		1601742631 author master *
+	*/
 	cmd := exec.Command(
 		gitExecutable,
-		"--no-pager", "branch",
+		"for-each-ref",
+		"--sort=-authordate:iso8601",
+		"--format=%(authordate:unix) %(authorname) %(refname:short) %(HEAD)",
+		"refs/heads",
 	)
+
 	output, err := cmd.Output()
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -50,40 +56,32 @@ func GetBranches() (*Branches, error) {
 }
 
 func parseGitBranches(rawBranches string) *Branches {
-	// parse git branch output by line
-	var lines []string
-	sc := bufio.NewScanner(strings.NewReader(rawBranches))
-	for sc.Scan() {
-		lines = append(lines, sc.Text())
-	}
-
 	gb := newGitBranches()
 
-	// get individual branch name + metadata
-	for i, str := range lines {
-		fields := strings.Fields(str)
-
-		var name string
-		if len(fields) > 1 && fields[0] == "*" {
-			name = fields[1]
-			gb.CurrentBranch = name
-			gb.CurrentBranchIndex = i
-		} else {
-			name = fields[0]
+	// parse git branch output by line
+	sc := bufio.NewScanner(strings.NewReader(rawBranches))
+	i := 0
+	for sc.Scan() {
+		fields := strings.Fields(sc.Text())
+		if len(fields) < 3 {
+			continue
+		}
+		b := Branch{
+			Name:          fields[2],
+			LastCommitter: fields[1],
+			LastCommit:    parseUnixTimestamp(fields[0]),
 		}
 
-		b := Branch{Name: name}
-		b.populateBranchMetadata()
+		if len(fields) == 4 && fields[3] == "*" {
+			gb.CurrentBranch = b.Name
+			gb.CurrentBranchIndex = i
+		}
 
 		gb.calcColumnWidth(b.LastCommitter, b.Name)
 		gb.Branches = append(gb.Branches, b)
-	}
 
-	// sort by date
-	branches := gb.Branches
-	sort.Slice(gb.Branches, func(i, j int) bool {
-		return branches[i].LastCommit.After(branches[j].LastCommit)
-	})
+		i++
+	}
 
 	return gb
 }
