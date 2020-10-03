@@ -40,7 +40,6 @@ func (b *Branch) populateBranchMetadata() {
 	if len(fields) == 2 {
 		b.LastCommit = parseUnixTimestamp(fields[0])
 		b.LastCommitter = fields[1]
-		fmt.Println(b.formatDate())
 	}
 }
 

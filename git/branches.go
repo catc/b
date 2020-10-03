@@ -64,7 +64,7 @@ func parseGitBranches(rawBranches string) *Branches {
 		fields := strings.Fields(str)
 
 		var name string
-		if len(fields) > 0 && fields[0] == "*" {
+		if len(fields) > 1 && fields[0] == "*" {
 			name = fields[1]
 			gb.CurrentBranch = name
 			gb.CurrentBranchIndex = i
