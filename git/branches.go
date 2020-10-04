@@ -3,11 +3,14 @@ package git
 import (
 	"bufio"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/mgutz/ansi"
 )
 
-const dateFieldWidth = 11
+const dateFieldWidth = 12
 const committerFieldPadding = 5
 const nameFieldPadding = 1
 
@@ -37,7 +40,7 @@ func GetBranches() (*Branches, error) {
 
 	/*
 		format:
-		1601742631 author master *
+		1601742631 author_name master *
 	*/
 	cmd := exec.Command(
 		gitExecutable,
@@ -105,19 +108,39 @@ func (gb *Branches) FormatBranchStrings() []string {
 	maxCommitterLen := gb.MaxColumnWidth["committer"]
 	maxNameLen := gb.MaxColumnWidth["name"]
 
+	// colors
+	dateFormat := ansi.ColorFunc("green+hb")
+	committerFormat := ansi.ColorFunc("white")
+	nameFormat := ansi.ColorFunc("white+hb")
+	asteriskFormat := ansi.ColorFunc("197+hb")
+
 	items := make([]string, 0)
 	for _, b := range gb.Branches {
-		// TODO - add colors
-		// TODO - add [current] tag
-		formatted := fmt.Sprintf("%*s %*s %*s",
-			-dateFieldWidth,
-			b.formatDate(),
-			-maxCommitterLen-committerFieldPadding,
-			b.LastCommitter,
-			-maxNameLen-nameFieldPadding,
-			b.Name,
-		)
+		date := fmt.Sprintf("%*s", -dateFieldWidth, b.formatDate())
+		committer := fmt.Sprintf("%*s", -maxCommitterLen-committerFieldPadding, b.LastCommitter)
+		name := nameFormat(b.Name)
+		if b.Name == gb.CurrentBranch {
+			name = asteriskFormat("✱ ") + name + asteriskFormat(" ✱")
+		}
+		name = fmt.Sprintf("%*s", -maxNameLen-nameFieldPadding, name)
+
+		formatted := dateFormat(date) +
+			committerFormat(committer) +
+			nameFormat(name)
+
 		items = append(items, formatted)
 	}
 	return items
+}
+
+// ChangeBranch switches branch
+func ChangeBranch(branch string) {
+	gitExecutable, _ := exec.LookPath("git")
+	cmdGoVer := &exec.Cmd{
+		Path:   gitExecutable,
+		Args:   []string{gitExecutable, "checkout", branch},
+		Stdout: os.Stdout,
+		Stderr: os.Stdout,
+	}
+	cmdGoVer.Run()
 }

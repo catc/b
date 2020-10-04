@@ -23,9 +23,9 @@
 				"isDefault": true
 			},
 			"presentation": {
-				//   "reveal": "silent"
-				"clear": true,
 				"panel": "dedicated"
+				// "reveal": "silent"
+				// "clear": true,
 			},
 		},
 	],

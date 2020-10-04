@@ -9,6 +9,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/catc/b/git"
+	"github.com/mgutz/ansi"
 )
 
 func changeBranch() {
@@ -23,12 +24,15 @@ func changeBranch() {
 		return
 	}
 
+	intro := fmt.Sprintf("%v local branches\n", len(gb.Branches))
+	fmt.Println(ansi.Color(intro, "white+bh"))
+
 	prompt := &survey.Select{
-		Message: "Select a branch",
+		Message: ansi.Color("Select a branch:", "white+b"),
 		Options: gb.FormatBranchStrings(),
 		Filter: func(filter string, value string, i int) bool {
-			name := gb.Branches[i].Name
-			return strings.Contains(name, filter)
+			name := strings.ToLower(gb.Branches[i].Name)
+			return strings.Contains(name, strings.ToLower(filter))
 		},
 		PageSize: 10,
 	}
@@ -46,6 +50,7 @@ func changeBranch() {
 		prompt,
 		&index,
 		survey.WithValidator(differentBranchValidator),
+		survey.WithIcons(setIcons),
 	); err == terminal.InterruptErr {
 		os.Exit(0)
 	} else if err != nil {
@@ -53,7 +58,9 @@ func changeBranch() {
 		return
 	}
 
-	fmt.Println(index)
+	git.ChangeBranch(gb.Branches[index].Name)
+}
 
-	// TODO - change to selected branch and exit
+func setIcons(icons *survey.IconSet) {
+	icons.SelectFocus.Text = "🌿"
 }
