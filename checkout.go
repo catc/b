@@ -12,7 +12,8 @@ import (
 	"github.com/mgutz/ansi"
 )
 
-func changeBranch() {
+// checkout existing branch
+func checkout() {
 	gb, err := git.GetBranches()
 	if err != nil {
 		fmt.Println(err)
