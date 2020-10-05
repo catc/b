@@ -28,7 +28,7 @@ func changeBranch() {
 	fmt.Println(ansi.Color(intro, "white+bh"))
 
 	prompt := &survey.Select{
-		Message: ansi.Color("Select a branch:", "white+b"),
+		Message: ansi.Color(" Select a branch:", "white+b"),
 		Options: gb.FormatBranchStrings(),
 		Filter: func(filter string, value string, i int) bool {
 			name := strings.ToLower(gb.Branches[i].Name)

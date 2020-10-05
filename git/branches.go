@@ -12,7 +12,9 @@ import (
 
 const dateFieldWidth = 12
 const committerFieldPadding = 5
-const nameFieldPadding = 1
+
+// +4 to account for asterisk padding on current branch
+const nameFieldPadding = 1 + 4
 
 // Branches contains all branches and git related configs
 type Branches struct {
@@ -112,24 +114,30 @@ func (gb *Branches) FormatBranchStrings() []string {
 	dateFormat := ansi.ColorFunc("green+hb")
 	committerFormat := ansi.ColorFunc("white")
 	nameFormat := ansi.ColorFunc("white+hb")
-	asteriskFormat := ansi.ColorFunc("197+hb")
+	asteriskFormat := ansi.ColorFunc("5+hb")
 
 	items := make([]string, 0)
 	for _, b := range gb.Branches {
+		name := nameFormat(b.Name)
+		// pad current branch with asterisks
+		if b.Name == gb.CurrentBranch {
+			name = asteriskFormat("✱ ") +
+				name +
+				asteriskFormat(" ✱")
+		}
+
+		// column alignment
+		name = fmt.Sprintf("%*s ", -maxNameLen-nameFieldPadding, name)
 		date := fmt.Sprintf("%*s", -dateFieldWidth, b.formatDate())
 		committer := fmt.Sprintf("%*s", -maxCommitterLen-committerFieldPadding, b.LastCommitter)
-		name := nameFormat(b.Name)
-		if b.Name == gb.CurrentBranch {
-			name = asteriskFormat("✱ ") + name + asteriskFormat(" ✱")
-		}
-		name = fmt.Sprintf("%*s", -maxNameLen-nameFieldPadding, name)
 
 		formatted := dateFormat(date) +
 			committerFormat(committer) +
-			nameFormat(name)
+			name
 
 		items = append(items, formatted)
 	}
+
 	return items
 }
 
