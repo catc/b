@@ -48,7 +48,7 @@ func GetBranches() (*Branches, error) {
 		gitExecutable,
 		"for-each-ref",
 		"--sort=-authordate:iso8601",
-		"--format=%(authordate:unix) %(authorname) %(refname:short) %(HEAD)",
+		"--format=%(authordate:unix)|%(authorname)|%(refname:short)|%(HEAD)",
 		"refs/heads",
 	)
 
@@ -67,8 +67,8 @@ func parseGitBranches(rawBranches string) *Branches {
 	sc := bufio.NewScanner(strings.NewReader(rawBranches))
 	i := 0
 	for sc.Scan() {
-		fields := strings.Fields(sc.Text())
-		if len(fields) < 3 {
+		fields := strings.Split(sc.Text(), "|")
+		if len(fields) < 4 {
 			continue
 		}
 		b := Branch{
@@ -77,7 +77,7 @@ func parseGitBranches(rawBranches string) *Branches {
 			LastCommit:    parseUnixTimestamp(fields[0]),
 		}
 
-		if len(fields) == 4 && fields[3] == "*" {
+		if fields[3] == "*" {
 			gb.CurrentBranch = b.Name
 			gb.CurrentBranchIndex = i
 		}

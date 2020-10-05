@@ -34,7 +34,7 @@ func changeBranch() {
 			name := strings.ToLower(gb.Branches[i].Name)
 			return strings.Contains(name, strings.ToLower(filter))
 		},
-		PageSize: 10,
+		PageSize: 18,
 	}
 
 	differentBranchValidator := func(val interface{}) error {
@@ -54,7 +54,7 @@ func changeBranch() {
 	); err == terminal.InterruptErr {
 		os.Exit(0)
 	} else if err != nil {
-		fmt.Println("Error with survey", err)
+		fmt.Println("Error with survey:", err)
 		return
 	}
 
