@@ -1,3 +1,3 @@
 # b
-Navigate through git branches in a cleaner fashion
+Git branch tools + shortcuts
 
