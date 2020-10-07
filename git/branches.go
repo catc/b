@@ -27,7 +27,7 @@ type Branches struct {
 func newGitBranches() *Branches {
 	return &Branches{
 		Branches:           make([]Branch, 0),
-		CurrentBranch:      "_",
+		CurrentBranch:      "",
 		CurrentBranchIndex: -1,
 		MaxColumnWidth:     make(map[string]int),
 	}
@@ -148,7 +148,19 @@ func ChangeBranch(branch string) {
 		Path:   gitExecutable,
 		Args:   []string{gitExecutable, "checkout", branch},
 		Stdout: os.Stdout,
-		Stderr: os.Stdout,
+		Stderr: os.Stderr,
+	}
+	cmdGoVer.Run()
+}
+
+// CreateBranch creates a new git branch
+func CreateBranch(branch string) {
+	gitExecutable, _ := exec.LookPath("git")
+	cmdGoVer := &exec.Cmd{
+		Path:   gitExecutable,
+		Args:   []string{gitExecutable, "branch", branch},
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
 	}
 	cmdGoVer.Run()
 }
