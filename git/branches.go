@@ -2,6 +2,7 @@ package git
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,6 +16,13 @@ const committerFieldPadding = 5
 
 // +4 to account for asterisk padding on current branch
 const nameFieldPadding = 1 + 4
+
+// colors
+const green = "\033[92m"
+const white = "\033[39m"
+const yellow = "\033[33m"
+const blue = "\033[94m"
+const magenta = "\033[95m"
 
 // Branches contains all branches and git related configs
 type Branches struct {
@@ -105,16 +113,39 @@ func (gb *Branches) calcColumnWidth(committer, name string) {
 	}
 }
 
+// custom color func to avoid reset (and allow bold styling for entire line)
+func colorFunc(style string) func(string) string {
+	if style == "" {
+		return func(s string) string {
+			return s
+		}
+	}
+	return func(s string) string {
+		if s == "" {
+			return s
+		}
+		buf := bytes.NewBufferString(style)
+		buf.WriteString(s)
+		result := buf.String()
+		return result
+	}
+}
+
 // FormatBranchStrings converts the branch obj to a pretty, formatted string
-func (gb *Branches) FormatBranchStrings() []string {
+func (gb *Branches) FormatBranchStrings(canBold bool) []string {
 	maxCommitterLen := gb.MaxColumnWidth["committer"]
 	maxNameLen := gb.MaxColumnWidth["name"]
 
-	// colors
-	dateFormat := ansi.ColorFunc("green+hb")
-	committerFormat := ansi.ColorFunc("white")
-	nameFormat := ansi.ColorFunc("white+hb")
-	asteriskFormat := ansi.ColorFunc("5+hb")
+	dateFormat := colorFunc(green)
+	committerFormat := colorFunc(yellow)
+	nameFormat := colorFunc(white)
+	asteriskFormat := colorFunc(magenta)
+	if canBold {
+		dateFormat = ansi.ColorFunc("green+hb")
+		committerFormat = ansi.ColorFunc("white")
+		nameFormat = ansi.ColorFunc("white+hb")
+		asteriskFormat = ansi.ColorFunc("5+hb")
+	}
 
 	items := make([]string, 0)
 	for _, b := range gb.Branches {

@@ -14,10 +14,11 @@ func list() {
 		return
 	}
 
-	intro := fmt.Sprintf("%v local branches:", len(gb.Branches))
+	intro := fmt.Sprintf("\n%v local branches:", len(gb.Branches))
 	fmt.Println(ansi.Color(intro, "white+bh"))
 
-	for _, b := range gb.FormatBranchStrings() {
+	for _, b := range gb.FormatBranchStrings(true) {
 		fmt.Println(b)
 	}
+	fmt.Println("")
 }
