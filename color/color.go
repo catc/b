@@ -9,6 +9,9 @@ const yellow = "\033[33m"
 const blue = "\033[94m"
 const magenta = "\033[95m"
 
+// Reset ...
+const Reset = "\033[0m"
+
 func getColor(s string) string {
 	switch s {
 	case "green":

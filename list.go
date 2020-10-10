@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/catc/b/git"
-	"github.com/mgutz/ansi"
 )
 
 func list() {
@@ -14,8 +13,7 @@ func list() {
 		return
 	}
 
-	intro := fmt.Sprintf("\n%v local branches:", len(gb.Branches))
-	fmt.Println(ansi.Color(intro, "white+bh"))
+	displayIntro(gb)
 
 	for _, b := range gb.FormatBranchStrings(true) {
 		fmt.Println(b)

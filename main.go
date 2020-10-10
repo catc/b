@@ -22,6 +22,19 @@ func init() {
 	flag.Usage = func() {
 		fmt.Fprint(os.Stderr, usage)
 	}
+
+	// permutate args (so `b prune -a` works correctly)
+	// https://stackoverflow.com/questions/25113313/golang-flag-stops-parsing-after-the-first-non-option
+	args := os.Args[1:]
+	optind := 0
+	for i := range args {
+		if args[i][0] == '-' {
+			tmp := args[i]
+			args[i] = args[optind]
+			args[optind] = tmp
+			optind++
+		}
+	}
 }
 
 func main() {

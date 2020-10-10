@@ -139,7 +139,7 @@ func (gb *Branches) FormatBranchStrings(canBold bool) []string {
 
 		formatted := dateFormat(date) +
 			committerFormat(committer) +
-			name
+			name + color.Reset
 
 		items = append(items, formatted)
 	}
@@ -165,6 +165,18 @@ func CreateBranch(branch string) {
 	cmdGoVer := &exec.Cmd{
 		Path:   gitExecutable,
 		Args:   []string{gitExecutable, "branch", branch},
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+	}
+	cmdGoVer.Run()
+}
+
+// DeleteBranches deletes selected branches
+func DeleteBranches(branches []string) {
+	gitExecutable, _ := exec.LookPath("git")
+	cmdGoVer := &exec.Cmd{
+		Path:   gitExecutable,
+		Args:   append([]string{gitExecutable, "branch", "-D"}, branches...),
 		Stdout: os.Stdout,
 		Stderr: os.Stderr,
 	}

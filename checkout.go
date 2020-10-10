@@ -12,6 +12,8 @@ import (
 	"github.com/mgutz/ansi"
 )
 
+const pageSize = 18
+
 // checkout existing branch
 func checkout() {
 	gb, err := git.GetBranches()
@@ -25,8 +27,7 @@ func checkout() {
 		return
 	}
 
-	intro := fmt.Sprintf("\n%v local branches\n", len(gb.Branches))
-	fmt.Println(ansi.Color(intro, "white+bh"))
+	displayIntro(gb)
 
 	prompt := &survey.Select{
 		Message: ansi.Color(" Select a branch:", "white+b"),
@@ -35,7 +36,7 @@ func checkout() {
 			name := strings.ToLower(gb.Branches[i].Name)
 			return strings.Contains(name, strings.ToLower(filter))
 		},
-		PageSize: 18,
+		PageSize: pageSize,
 	}
 
 	differentBranchValidator := func(val interface{}) error {
