@@ -33,7 +33,7 @@ func prune(auto bool) {
 	displayIntro(gb)
 
 	selected := []int{}
-	options := gb.FormatBranchStrings(true)
+	options := gb.FormatBranchStrings(false)
 	prompt := &survey.MultiSelect{
 		Message:  "Select branches to delete:",
 		Options:  options,

@@ -12,7 +12,7 @@ import (
 	"github.com/mgutz/ansi"
 )
 
-const pageSize = 18
+const pageSize = 32
 
 // checkout existing branch
 func checkout() {
