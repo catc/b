@@ -4,18 +4,18 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 )
 
 const usage = `By default, b checks out an existing branch. Usage:
 
 Flags:
-  -l         list all branches
+  -l          list all branches
 
 Additional commands available:
-  clone      create a clone of the current branch
-  prune      select branches to remove
-    -a       auto remove all branches older than 30 days (default: false)
-
+  clone       create a clone of the current branch
+	prune [#]   select branches to remove, can optionally specify how many days in past to prune
+  add         interactively stage files
 `
 
 func init() {
@@ -38,23 +38,36 @@ func init() {
 }
 
 func main() {
-	a := flag.Bool("a", false, "auto prune")
-	l := flag.Bool("l", false, "list branches")
+	lFlag := flag.Bool("l", false, "list branches")
 	flag.Parse()
 
 	args := flag.Args()
 	if len(args) > 0 {
 		switch args[0] {
 		case "prune":
-			prune(*a)
+			// prune by date (ie: days in past)
+			if len(args) == 2 {
+				i, err := strconv.Atoi(args[1])
+				if err != nil {
+					flag.Usage()
+					return
+				}
+				prune(i)
+				return
+			}
+			// manually select branches to prune
+			prune(0)
 			break
 		case "clone":
 			clone()
 			break
+		case "add":
+			add()
+			break
 		default:
 			flag.Usage()
 		}
-	} else if *l {
+	} else if *lFlag {
 		list()
 	} else {
 		checkout()

@@ -9,11 +9,9 @@ import (
 	"github.com/mgutz/ansi"
 )
 
-// prune branches older than 40 days
 const day = time.Hour * 24
-const autoPruneDelta = day * 40
 
-func prune(auto bool) {
+func prune(days int) {
 	gb, err := git.GetBranches()
 	if err != nil {
 		fmt.Println(err)
@@ -25,8 +23,8 @@ func prune(auto bool) {
 		return
 	}
 
-	if auto {
-		autoPrune(gb)
+	if days > 0 {
+		autoPrune(gb, days)
 		return
 	}
 
@@ -78,8 +76,8 @@ func confirm(gb *git.Branches, selected []int) {
 	git.DeleteBranches(branches)
 }
 
-func autoPrune(gb *git.Branches) {
-	cutoff := time.Now().Add(-autoPruneDelta)
+func autoPrune(gb *git.Branches, days int) {
+	cutoff := time.Now().Add(-day * time.Duration(days))
 
 	selected := []int{}
 	for i, b := range gb.Branches {
