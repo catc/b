@@ -18,27 +18,28 @@ var yellowhb = ansi.ColorFunc("yellow")
 var blue = ansi.ColorFunc("blue+hb")
 
 func add() {
-	fmt.Println(fmt.Sprintf("\n%v", green("Tracked files:")))
 
 	files, err := git.GetChangedFiles()
 	if err != nil {
 		panic("Failed to get changed files")
 	}
 	if len(files) == 0 {
-		fmt.Println("No tracked files to diff")
+		fmt.Println("\nNo tracked files to diff")
 	} else {
+		fmt.Println(fmt.Sprintf("\n%v", green("Tracked files:")))
 		for _, name := range files {
 			judge(name, true)
 		}
 	}
 
-	fmt.Println(fmt.Sprintf("\n%v", red("Untracked files:")))
+	files, err = git.GetUntrackedFiles()
 	if err != nil {
 		panic("Failed to get untracked files")
 	}
 	if len(files) == 0 {
-		fmt.Println("No untracked files to diff")
+		fmt.Println("\nNo untracked files to diff")
 	} else {
+		fmt.Println(fmt.Sprintf("\n%v", red("Untracked files:")))
 		for _, name := range files {
 			judge(name, false)
 		}
