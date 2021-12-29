@@ -28,3 +28,8 @@ Clone branch - useful if about to make potentially destructive changes and don't
 #### `b add`
 Walk through changed + untracked files to stage, basically a glorified git diff
 <br/>
+
+
+## Dev
+- install deps via `go mod download`
+- build and run `go build && ./b`
