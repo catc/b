@@ -26,7 +26,7 @@ Clone branch - useful if about to make potentially destructive changes and don't
 <br/>
 
 #### `b add`
-Walk through changed + untracked files to stage, basically a glorified git diff
+Walk through changed + untracked files to stage, basically a glorified git diff with the option to add, skip or checkout unstaged files
 <br/>
 
 
